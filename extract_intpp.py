@@ -41,10 +41,10 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
     dirin = os.path.join('/home/datawork-marbec-scenlab/NEMO/FORCING-FISHMIP/', f'{scenario}-fIPSL-cOBSN-v2', 'Output')
     dirin
     
-    filelist = glob(os.path.join(dirin, '*1m*diaptr*'))
+    filelist = glob(os.path.join(dirin, '*v2_20[2-9]*1m*diaptr*'))
+    filelist += glob(os.path.join(dirin, '*v2_201[5-9]*1m*diaptr*'))
     filelist.sort()
-    filelist[:5]
-
+    
     for f in filelist:
 
         print("+++++ Processing file ", f)
@@ -56,19 +56,27 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
             continue
         data = data.rename({"time_counter": "time"})
 
-        tpp = (data['TPP'])
-        tpp.name = 'intpp'
+        intppmisc = data['INTPPPHY']
+        intppmisc.name = 'intppmisc'
+        
+        intppdiat = data['INTPPPHY2']
+        intppdiat.name = 'intppdiat'
 
-        date = tpp['time']
+        intpp = intppmisc + intppdiat
+        intpp.name = 'intpp'
+        intpp.attrs['units'] = intppmisc.attrs['units']
+        
+        date = inttpp['time']
         date
         
         years = np.array([d.year for d in date.values])
         months = np.array([d.month for d in date.values])
         days = np.array([d.day for d in date.values])
 
-        foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{tpp.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
-        foutname
-        print(foutname)
-        tpp.to_netcdf(foutname, unlimited_dims=['time'])
+        for var in [intppmisc, intppdiat, intpp]:
+            foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{var.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
+            foutname
+            print(foutname)
+            var.to_netcdf(foutname, unlimited_dims=['time'])
 
 # %%
