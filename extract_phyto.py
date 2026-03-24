@@ -62,25 +62,25 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
         data = data.rename({"time_counter": "time", "olevel": 'z'})
 
         #-------- processing diatoms
-        diat = mmol_to_mol * data['PHY2']
-        diat.name = 'phydiat'
-        diat.attrs['units'] = 'mol/m3'
+        phydiat = mmol_to_mol * data['PHY2']
+        phydiat.name = 'phydiat'
+        phydiat.attrs['units'] = 'mol/m3'
 
-        diat_vint = diat.weighted(weight).sum(dim='z')
-        diat_vint.name = 'phydiat-vint'
-        diat_vint.attrs['units'] = 'mol/m2'
+        phydiat_vint = phydiat.weighted(weight).sum(dim='z')
+        phydiat_vint.name = 'phydiat-vint'
+        phydiat_vint.attrs['units'] = 'mol/m2'
 
         #--------- processing misc
-        misc = mmol_to_mol * data['PHY']
-        misc.name = 'phymisc'
-        misc.attrs['units'] = 'mol/m3'
+        phymisc = mmol_to_mol * data['PHY']
+        phymisc.name = 'phymisc'
+        phymisc.attrs['units'] = 'mol/m3'
 
-        misc_vint = misc.weighted(weight).sum(dim='z')
-        misc_vint.name = 'phymisc-vint'
-        misc_vint.attrs['units'] = 'mol/m2'
+        phymisc_vint = phymisc.weighted(weight).sum(dim='z')
+        phymisc_vint.name = 'phymisc-vint'
+        phymisc_vint.attrs['units'] = 'mol/m2'
 
         #------- Sum of diat + misc
-        phyc = diat + misc
+        phyc = phydiat + phymisc
         phyc.name = 'phyc'
         phyc.attrs['units'] = 'mol/m3'
 
