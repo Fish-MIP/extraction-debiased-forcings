@@ -20,6 +20,21 @@ import os
 import numpy as np
 
 # %%
+mesh = xr.open_dataset("/home1/datawork/nbarrier/apecosm/apecosm-private/test/resources/mesh_mask_orca1.nc4")
+mesh = mesh.squeeze()
+mesh
+
+# %%
+# mbathy returns the number of ocean cells.
+# if 74, to have the bottom cell we must extract at k=73
+# so we remove 1 to mbathy. When it is land, mbathy is then -1 and we 
+# reset negative values to 0
+mbathy = mesh['mbathy'] - 1
+mbathy = mbathy.where(mbathy >= 0).fillna(0)
+mbathy = mbathy.astype(int)
+mbathy
+
+# %%
 for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
 
     print("-------------------------- Processing scenario ", scenario)
@@ -58,6 +73,18 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
         temp.name = 'thetao'
         temp.attrs['units'] = 'C'
 
+        # creation of temp_surf variable by taking the 
+        # first ocean level
+        temp_surf = temp.isel(olevel=0)
+        temp_surf.name = 'tos'
+        temp_surf.attrs['units'] = temp.attrs['units']
+    
+        # creation of temp_bot variable by taking the 
+        # last ocean level
+        temp_bot = temp.isel(olevel=mbathy)
+        temp_bot.name = 'tob'
+        temp_bot.attrs['units'] = temp.attrs['units']
+        
         date = temp['time']
         date
         
@@ -66,8 +93,12 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
         days = np.array([d.day for d in date.values])
 
         foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{temp.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
-        foutname
-        print(foutname)
         temp.to_netcdf(foutname, unlimited_dims=['time'])
+
+        foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{temp_surf.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
+        temp_surf.to_netcdf(foutname, unlimited_dims=['time'])
+
+        foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{temp_bot.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
+        temp_bot.to_netcdf(foutname, unlimited_dims=['time'])
 
 # %%
