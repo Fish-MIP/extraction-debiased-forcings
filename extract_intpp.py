@@ -56,10 +56,10 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
             continue
         data = data.rename({"time_counter": "time"})
 
-        intppmisc = data['INTPPPHY']
+        intppmisc = data['INTPPHY']
         intppmisc.name = 'intppmisc'
         
-        intppdiat = data['INTPPPHY2']
+        intppdiat = data['INTPPHY2']
         intppdiat.name = 'intppdiat'
 
         intpp = intppmisc + intppdiat
