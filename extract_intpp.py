@@ -59,7 +59,7 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
         tpp = (data['TPP'])
         tpp.name = 'intpp'
 
-        date = intpp['time']
+        date = tpp['time']
         date
         
         years = np.array([d.year for d in date.values])
