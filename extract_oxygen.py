@@ -64,7 +64,11 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
     for f in filelist:
 
         # Conversion of oxy from mmol/m3 to mol/m3
-        oxy = 1e-3 * xr.open_dataset(f)['O2']
+        try:
+            oxy = 1e-3 * xr.open_dataset(f)['O2']
+        except:
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@ error with ", f)
+            continue
         oxy = oxy.rename({'time_counter': 'time'})
         oxy.name = 'o2'
         oxy.attrs['units'] = 'mol/m3'

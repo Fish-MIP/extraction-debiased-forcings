@@ -49,8 +49,12 @@ for scenario in ['SSP126', 'SSP245',  'SSP370',  'SSP585']:
     for f in filelist:
 
         print("+++++ Processing file ", f)
-    
-        data = xr.open_dataset(f)
+
+        try:
+            data = xr.open_dataset(f)
+        except:
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@ error with ", f)
+            continue
         data
         
         # Extract chlorophyle by summing its two components
