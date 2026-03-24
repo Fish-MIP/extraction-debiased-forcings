@@ -24,6 +24,9 @@ mesh = xr.open_dataset("/home1/datawork/nbarrier/apecosm/apecosm-private/test/re
 mesh
 
 # %%
+mmol_to_mol = 1e-3
+
+# %%
 for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
 
     print("-------------------------- Processing scenario ", scenario)
@@ -36,12 +39,10 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
     if not os.path.exists(dirout):
         os.makedirs(dirout)
     
-    # Extract the list of forcing files (one file per month) for the given scenario
-    
     dirin = os.path.join('/home/datawork-marbec-scenlab/NEMO/FORCING-FISHMIP/', f'{scenario}-fIPSL-cOBSN-v2', 'Output')
     dirin
     
-    filelist = glob(os.path.join(dirin, '*1m*diaptr*'))
+    filelist = glob(os.path.join(dirin, '*1m*ptrc_T*'))
     filelist.sort()
     filelist[:5]
 
@@ -56,19 +57,30 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
             continue
         data = data.rename({"time_counter": "time"})
 
-        tpp = (data['TPP'])
-        tpp.name = 'intpp'
-
-        date = intpp['time']
+        szoo = mmol_to_mol * data['ZOO']
+        szoo.name = 'szoo'
+        szoo.attrs['units'] = 'mol/m3'
+        
+        lzoo = mmol_to_mol * data['ZOO2']
+        lzoo.name = 'lzoo'
+        lzoo.attrs['units'] = 'mol/m3'
+        
+        zoo = szoo + lzoo
+        zoo.name = 'zoo'
+        zoo.attrs['units'] = 'mol/m3'
+        
+        date = zoo['time']
         date
         
         years = np.array([d.year for d in date.values])
         months = np.array([d.month for d in date.values])
         days = np.array([d.day for d in date.values])
 
-        foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{tpp.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
-        foutname
-        print(foutname)
-        tpp.to_netcdf(foutname, unlimited_dims=['time'])
+        for var in [szoo, lzoo, zoo]: 
+            print(var.name)
+            foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{var.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
+            foutname
+            print(foutname)
+            var.to_netcdf(foutname, unlimited_dims=['time'])
 
 # %%
