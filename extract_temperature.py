@@ -40,7 +40,7 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
     filelist = glob(os.path.join(dirin, '*v2_20[2-9]*1m*grid_T*'))
     filelist += glob(os.path.join(dirin, '*v2_201[5-9]*1m*grid_T*'))
     filelist.sort()
-    print(filelist)
+    # print(filelist)
 
     for f in filelist:
 
