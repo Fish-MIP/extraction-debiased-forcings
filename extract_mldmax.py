@@ -44,7 +44,7 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
     print("-------------------------- Processing scenario ", scenario)
 
     # Output folder
-    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/mldgen', scenario.lower())
+    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/mld', scenario.lower())
     dirout
     
     # Create output folder if not exists
