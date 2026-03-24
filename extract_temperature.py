@@ -20,16 +20,12 @@ import os
 import numpy as np
 
 # %%
-mesh = xr.open_dataset("/home1/datawork/nbarrier/apecosm/apecosm-private/test/resources/mesh_mask_orca1.nc4")
-mesh
-
-# %%
 for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
 
     print("-------------------------- Processing scenario ", scenario)
 
     # Output folder
-    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/', scenario.lower())
+    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/temperature', scenario.lower())
     dirout
     
     # Create output folder if not exists
@@ -41,9 +37,10 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
     dirin = os.path.join('/home/datawork-marbec-scenlab/NEMO/FORCING-FISHMIP/', f'{scenario}-fIPSL-cOBSN-v2', 'Output')
     dirin
     
-    filelist = glob(os.path.join(dirin, '*1m*grid_T*'))
+    filelist = glob(os.path.join(dirin, '*v2_20[2-9]*1m*grid_T*'))
+    filelist += glob(os.path.join(dirin, '*v2_201[5-9]*1m*grid_T*'))
     filelist.sort()
-    filelist[:5]
+    print(filelist)
 
     for f in filelist:
 
@@ -56,9 +53,10 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
             continue
         data = data.rename({"time_counter": "time"})
 
-        temp = (data['thetao']) + 273.15
-        temp.name = 't'
-        temp.attrs['units'] = 'K'
+        # Conversion from C to K
+        temp = (data['thetao'])
+        temp.name = 'thetao'
+        temp.attrs['units'] = 'C'
 
         date = temp['time']
         date
@@ -70,6 +68,6 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
         foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{temp.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
         foutname
         print(foutname)
-        tpp.to_netcdf(foutname, unlimited_dims=['time'])
+        temp.to_netcdf(foutname, unlimited_dims=['time'])
 
 # %%
