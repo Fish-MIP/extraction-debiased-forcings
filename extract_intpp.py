@@ -66,7 +66,7 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
         intpp.name = 'intpp'
         intpp.attrs['units'] = intppmisc.attrs['units']
         
-        date = inttpp['time']
+        date = intpp['time']
         date
         
         years = np.array([d.year for d in date.values])
