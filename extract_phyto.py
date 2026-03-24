@@ -21,7 +21,11 @@ import numpy as np
 
 # %%
 mesh = xr.open_dataset("/home1/datawork/nbarrier/apecosm/apecosm-private/test/resources/mesh_mask_orca1.nc4")
-mesh
+mesh = mesh.squeeze()
+
+# %%
+weight = mesh['e3t_0'] * mesh['tmask']
+weight = weight.fillna(0)
 
 # %%
 mmol_to_mol = 1e-3
@@ -32,7 +36,7 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
     print("-------------------------- Processing scenario ", scenario)
 
     # Output folder
-    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/', scenario.lower())
+    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/phyto', scenario.lower())
     dirout
     
     # Create output folder if not exists
@@ -55,19 +59,34 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
         except:
             print("@@@@@@@@@@@@@@@@@@@@@@@@@@@ error with ", f)
             continue
-        data = data.rename({"time_counter": "time"})
+        data = data.rename({"time_counter": "time", "olevel": 'z'})
 
+        #-------- processing diatoms
         diat = mmol_to_mol * data['PHY2']
-        diat.name = 'lphyc'
+        diat.name = 'phydiat'
         diat.attrs['units'] = 'mol/m3'
-        
+
+        diat_vint = diat.weighted(weight).sum(dim='z')
+        diat_vint.name = 'phydiat-vint'
+        diat_vint.attrs['units'] = 'mol/m2'
+
+        #--------- processing misc
         misc = mmol_to_mol * data['PHY']
-        misc.name = 'sphyc'
+        misc.name = 'phymisc'
         misc.attrs['units'] = 'mol/m3'
-        
+
+        misc_vint = misc.weighted(weight).sum(dim='z')
+        misc_vint.name = 'phymisc-vint'
+        misc_vint.attrs['units'] = 'mol/m2'
+
+        #------- Sum of diat + misc
         phyc = diat + misc
         phyc.name = 'phyc'
         phyc.attrs['units'] = 'mol/m3'
+
+        phyc_vint = phyc.weighted(weight).sum(dim='z')
+        phyc_vint.name = 'phyc-vint'
+        phyc_vint.attrs['units'] = 'mol/m2'
         
         date = phyc['time']
         date
@@ -76,11 +95,25 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
         months = np.array([d.month for d in date.values])
         days = np.array([d.day for d in date.values])
 
-        for var in [diat, misc, phyc]: 
-            print(var.name)
-            foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{var.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
-            foutname
-            print(foutname)
-            var.to_netcdf(foutname, unlimited_dims=['time'])
+        foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_phydiat_1deg_global_monthly_{years.min()}_{years.max()}.nc')
+        foutname
+        dsout = xr.Dataset()
+        dsout['phydiat'] = phydiat
+        dsout['phydiat-vint'] = phydiat_vint
+        dsout.to_netcdf(foutname, unlimited_dims=['time'])   
+
+        foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_phymisc_1deg_global_monthly_{years.min()}_{years.max()}.nc')
+        foutname
+        dsout = xr.Dataset()
+        dsout['phymisc'] = phymisc
+        dsout['phymisc-vint'] = phymisc_vint
+        dsout.to_netcdf(foutname, unlimited_dims=['time'])   
+
+        foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_phyc_1deg_global_monthly_{years.min()}_{years.max()}.nc')
+        foutname
+        dsout = xr.Dataset()
+        dsout['phyc'] = phyc
+        dsout['phyc-vint'] = phyc_vint
+        dsout.to_netcdf(foutname, unlimited_dims=['time'])   
 
 # %%
