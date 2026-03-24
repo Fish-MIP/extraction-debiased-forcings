@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -l mem=16g
+#PBS -l walltime=24:00:00
+
+. /appli/anaconda/latest/etc/profile.d/conda.sh
+conda activate nbarrier2
+
+cd $PBS_O_WORKDIR
+echo $PBS_O_WORKDIR
+qstat -f $PBS_JOBID
+
+for f in extract_*py
+do
+    logfile=`echo $f |sed "s/py/log/"`
+    python $f  >&  $logfile
+done
