@@ -30,7 +30,7 @@ for scenario in ['SSP126', 'SSP245',  'SSP370',  'SSP585']:
     print("-------------------------- Processing scenario ", scenario)
 
     # Output folder
-    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/', scenario.lower())
+    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/chl', scenario.lower())
     dirout
     
     # Create output folder if not exists
@@ -42,9 +42,9 @@ for scenario in ['SSP126', 'SSP245',  'SSP370',  'SSP585']:
     dirin = os.path.join('/home/datawork-marbec-scenlab/NEMO/FORCING-FISHMIP/', f'{scenario}-fIPSL-cOBSN-v2', 'Output')
     dirin
     
-    filelist = glob(os.path.join(dirin, '*1m*ptrc_T*'))
+    filelist = glob(os.path.join(dirin, '*v2_20[2-9]*1m*ptrc_T*'))
+    filelist += glob(os.path.join(dirin, '*v2_201[5-9]*1m*ptrc_T*'))
     filelist.sort()
-    filelist[:5]
 
     for f in filelist:
 
@@ -63,7 +63,7 @@ for scenario in ['SSP126', 'SSP245',  'SSP370',  'SSP585']:
         chl = chl.rename({'time_counter': 'time'})
         chl.name = 'chl'
         chl
-        chl.attrs['units'] = 'kg.m-3'
+        chl.attrs['units'] = 'kg/m3'
         chl.attrs['long_name'] = 'Mass Concentration of Total Phytoplankton Expressed as Chlorophyll'
         
         date = chl['time']
