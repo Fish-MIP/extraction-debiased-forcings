@@ -83,7 +83,6 @@ def extract_historical(suffix):
 
 
 def extract_pi(suffix):
-    suffix = 'ptrc_T'
 
     dirin = os.path.join('/home/datawork-marbec-pmod/Matt/ORCA1_PISCES_BLK', 'PI-bJRA-v2-c5/', 'Output')
     dirin
