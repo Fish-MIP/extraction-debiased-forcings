@@ -18,6 +18,7 @@ import xarray as xr
 from glob import glob
 import os
 import numpy as np
+import filelist_extraction as fe
 
 # %%
 mesh = xr.open_dataset("/home1/datawork/nbarrier/apecosm/apecosm-private/test/resources/mesh_mask_orca1.nc4")
@@ -39,12 +40,12 @@ depth = mesh['gdept_0'].squeeze()
 depth.isel(z=mbathy).plot()
 
 # %%
-for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
+for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
 
     print("-------------------------- Processing scenario ", scenario)
 
     # Output folder
-    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/oxygen', scenario.lower())
+    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/', scenario, 'oxygen')
     dirout
     
     # Create output folder if not exists
@@ -56,11 +57,9 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
     dirin = os.path.join('/home/datawork-marbec-scenlab/NEMO/FORCING-FISHMIP/', f'{scenario}-fIPSL-cOBSN-v2', 'Output')
     dirin
     
-    filelist = glob(os.path.join(dirin, '*v2_20[2-9]*1m*ptrc_T*'))
-    filelist += glob(os.path.join(dirin, '*v2_201[5-9]*1m*ptrc_T*'))
-    filelist.sort()
-    filelist[:5]
-    
+    filelist = fe.extract_scenario(scenario, 'ptrc_T')
+
+    cpt = 0
     for f in filelist:
 
         # Conversion of oxy from mmol/m3 to mol/m3
@@ -73,12 +72,17 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
         oxy.name = 'o2'
         oxy.attrs['units'] = 'mol/m3'
         
-        date = oxy['time']
+        date, time = fe.compute_time(scenario, cpt) 
 
-        years = np.array([d.year for d in date.values])
-        months = np.array([d.month for d in date.values])
-        days = np.array([d.day for d in date.values])
-    
+        years = np.array([d.year for d in date])
+        months = np.array([d.month for d in date])
+        days = np.array([d.day for d in date])
+        
+        oxy = oxy.assign_coords({"time": ("time", time)})
+        oxy['time'].attrs['units'] = fe.units
+        oxy.attrs['original_file'] = os.path.abspath(f)
+        oxy.attrs['script'] = 'extract_oxygen.py'
+
         # creation of oxy_surf variable by taking the 
         # first ocean level
         oxy_surf = oxy.isel(olevel=0)
@@ -100,5 +104,8 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
         foutname
         print(foutname)
         dsout.to_netcdf(foutname, unlimited_dims=['time'])
+
+        cpt += 1
+        break
 
 # %%
