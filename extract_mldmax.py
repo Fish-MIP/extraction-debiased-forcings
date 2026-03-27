@@ -56,8 +56,8 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
     dirin = os.path.join('/home/datawork-marbec-scenlab/NEMO/FORCING-FISHMIP/', f'{scenario}-fIPSL-cOBSN-v2', 'Output')
     dirin
     
-    filelist = glob(os.path.join(dirin, '*v2_20[2-9]*1m*ptrc_T*'))
-    filelist += glob(os.path.join(dirin, '*v2_201[5-9]*1m*ptrc_T*'))
+    filelist = glob(os.path.join(dirin, '*v2_20[2-9]*1m*grid_T*'))
+    filelist += glob(os.path.join(dirin, '*v2_201[5-9]*1m*grid_T*'))
     filelist.sort()
     filelist[:5]
     
