@@ -18,18 +18,19 @@ import xarray as xr
 from glob import glob
 import os
 import numpy as np
+import filelist_extraction as fe
 
 # %%
 mesh = xr.open_dataset("/home1/datawork/nbarrier/apecosm/apecosm-private/test/resources/mesh_mask_orca1.nc4")
 mesh
 
 # %%
-for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
+for scenario in ['SSP126', 'SSP245',  'SSP370',  'SSP585', 'historical', 'pi']:
 
     print("-------------------------- Processing scenario ", scenario)
 
     # Output folder
-    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/intpp', scenario.lower())
+    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/', scenario, 'intpp')
     dirout
     
     # Create output folder if not exists
@@ -37,16 +38,13 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
         os.makedirs(dirout)
     
     # Extract the list of forcing files (one file per month) for the given scenario
-    
-    dirin = os.path.join('/home/datawork-marbec-scenlab/NEMO/FORCING-FISHMIP/', f'{scenario}-fIPSL-cOBSN-v2', 'Output')
-    dirin
-    
-    filelist = glob(os.path.join(dirin, '*v2_20[2-9]*1m*diad_T*'))
-    filelist += glob(os.path.join(dirin, '*v2_201[5-9]*1m*diad_T*'))
-    filelist.sort()
+    filelist = fe.extract_scenario(scenario, 'diad_T')
+        
+    cpt = 0
     
     for f in filelist:
 
+        variable = []
         print("+++++ Processing file ", f)
 
         try:
@@ -54,29 +52,44 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
         except:
             print("@@@@@@@@@@@@@@@@@@@@@@@@@@@ error with ", f)
             continue
+        
         data = data.rename({"time_counter": "time"})
 
-        intppmisc = data['INTPPPHY']
-        intppmisc.name = 'intppmisc'
-        
-        intppdiat = data['INTPPPHY2']
-        intppdiat.name = 'intppdiat'
+        if 'INTPPPHY' in data.variables:
+            intppmisc = data['INTPPPHY']
+            intppmisc.name = 'intppmisc'
+            variable.append(intppmisc)
 
-        intpp = intppmisc + intppdiat
-        intpp.name = 'intpp'
-        intpp.attrs['units'] = intppmisc.attrs['units']
-        
-        date = intpp['time']
-        date
-        
-        years = np.array([d.year for d in date.values])
-        months = np.array([d.month for d in date.values])
-        days = np.array([d.day for d in date.values])
+        if 'INTPPPHY2' in data.variables:
+            intppdiat = data['INTPPPHY2']
+            intppdiat.name = 'intppdiat'
+            variable.append(intppdiat)
 
-        for var in [intppmisc, intppdiat, intpp]:
+        if 'INTPP' in data.variables:
+            intpp = data['INTPP']
+            intpp.name = 'intpp'    
+            variable.append(intpp)
+      
+        date, time = fe.compute_time(scenario, cpt) 
+                
+        years = np.array([d.year for d in date])
+        months = np.array([d.month for d in date])
+        days = np.array([d.day for d in date])
+
+        for var in variable:
+
+            print(var.name)
+
+            var = var.assign_coords({"time": ("time", time)})
+            var['time'].attrs['units'] = fe.units
+            var.attrs['original_file'] = os.path.abspath(f)
+            var.attrs['script'] = 'extract_intpp.py'
+            
             foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{var.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
             foutname
             print(foutname)
             var.to_netcdf(foutname, unlimited_dims=['time'])
+
+        cpt += 1
 
 # %%
