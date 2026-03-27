@@ -18,6 +18,7 @@ import xarray as xr
 from glob import glob
 import os
 import numpy as np
+import filelist_extraction as fe
 
 # %%
 mesh = xr.open_dataset("/home1/datawork/nbarrier/apecosm/apecosm-private/test/resources/mesh_mask_orca1.nc4")
@@ -35,51 +36,49 @@ mbathy = mbathy.astype(int)
 mbathy
 
 # %%
-for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
+for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
 
     print("-------------------------- Processing scenario ", scenario)
 
     # Output folder
-    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/ph', scenario.lower())
+    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/', scenario, 'ph')
     dirout
     
     # Create output folder if not exists
     if not os.path.exists(dirout):
         os.makedirs(dirout)
     
-    # Extract the list of forcing files (one file per month) for the given scenario
     
-    dirin = os.path.join('/home/datawork-marbec-scenlab/NEMO/FORCING-FISHMIP/', f'{scenario}-fIPSL-cOBSN-v2', 'Output')
-    dirin
-    
-    filelist = glob(os.path.join(dirin, '*v2_20[2-9]*1m*diad_T*'))
-    filelist += glob(os.path.join(dirin, '*v2_201[5-9]*1m*diad_T*'))
-    filelist.sort()
-    # print(filelist)
+    filelist = fe.extract_scenario(scenario, 'diad_T')
 
+    cpt = 0
     for f in filelist:
 
-        print("+++++ Processing file ", f)
 
         try:
-            data = xr.open_dataset(f)
+            temp = xr.open_dataset(f)['PHSFC']
         except:
             print("@@@@@@@@@@@@@@@@@@@@@@@@@@@ error with ", f)
             continue
-        data = data.rename({"time_counter": "time"})
+        print("+++++ Processing file ", f)
+        temp = temp.rename({"time_counter": "time"})
 
-        # Conversion from C to K
-        temp = (data['PHSFC'])
         temp.name = 'ph-surf'
 
-        date = temp['time']
-        date
+        date, time = fe.compute_time(scenario, cpt) 
+
+        years = np.array([d.year for d in date])
+        months = np.array([d.month for d in date])
+        days = np.array([d.day for d in date])
         
-        years = np.array([d.year for d in date.values])
-        months = np.array([d.month for d in date.values])
-        days = np.array([d.day for d in date.values])
+        temp = temp.assign_coords({"time": ("time", time)})
+        temp['time'].attrs['units'] = fe.units
+        temp.attrs['original_file'] = os.path.abspath(f)
+        temp.attrs['script'] = 'extract_phsurf.py'
 
         foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{temp.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
         temp.to_netcdf(foutname, unlimited_dims=['time'])
+
+        cpt += 1
 
 # %%

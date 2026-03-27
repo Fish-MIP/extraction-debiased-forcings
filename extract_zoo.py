@@ -18,6 +18,7 @@ import xarray as xr
 from glob import glob
 import os
 import numpy as np
+import file_extraction as fe
 
 # %%
 mesh = xr.open_dataset("/home1/datawork/nbarrier/apecosm/apecosm-private/test/resources/mesh_mask_orca1.nc4")
@@ -27,12 +28,12 @@ mesh
 mmol_to_mol = 1e-3
 
 # %%
-for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
+for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
 
     print("-------------------------- Processing scenario ", scenario)
 
     # Output folder
-    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/phyto', scenario.lower())
+    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/', scenario, 'zoo')
     dirout
     
     # Create output folder if not exists
@@ -42,9 +43,9 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
     dirin = os.path.join('/home/datawork-marbec-scenlab/NEMO/FORCING-FISHMIP/', f'{scenario}-fIPSL-cOBSN-v2', 'Output')
     dirin
     
-    filelist = glob(os.path.join(dirin, '*1m*ptrc_T*'))
-    filelist.sort()
-    filelist[:5]
+    # Extract the list of forcing files (one file per month) for the given scenario
+    filelist = fe.extract_scenario(scenario, 'ptrc_T')
+    cpt = 0
 
     for f in filelist:
 
@@ -84,12 +85,11 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
         zooc_vint.name = 'zooc-vint'
         zooc_vint.attrs['units'] = 'mol/m2'
         
-        date = zooc['time']
-        date
-        
-        years = np.array([d.year for d in date.values])
-        months = np.array([d.month for d in date.values])
-        days = np.array([d.day for d in date.values])
+        for temp in [zmicro, zmicro_vint, zmeso, zmeso_vint, zooc, zooc_vint]:
+            temp.assign_coords({"time": ("time", time)})
+            temp['time'].attrs['units'] = fe.units
+            temp.attrs['original_file'] = os.path.abspath(f)
+            temp.attrs['script'] = 'extract_zoos.py'
 
         foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_zmicro_1deg_global_monthly_{years.min()}_{years.max()}.nc')
         foutname
@@ -111,5 +111,7 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126']:
         dsout['zooc'] = zooc
         dsout['zooc-vint'] = zooc_vint
         dsout.to_netcdf(foutname, unlimited_dims=['time'])   
+
+        cpt += 1
 
 # %%
