@@ -61,6 +61,14 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
             continue
         data = data.rename({"time_counter": "time", "olevel": 'z'})
 
+        date, time = fe.compute_time(scenario, cpt) 
+        
+        data = data.drop_vars(['time_centered'])
+        data.assign_coords({"time": ("time", time)})
+        data['time'].attrs['units'] = fe.units
+        data.attrs['original_file'] = os.path.abspath(f)
+        data.attrs['script'] = 'extract_phyto.py'
+        
         #-------- processing diatoms
         phydiat = mmol_to_mol * data['PHY2']
         phydiat.name = 'phydiat'
@@ -88,18 +96,10 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         phyc_vint.name = 'phyc-vint'
         phyc_vint.attrs['units'] = 'mol/m2'
         
-        date, time = fe.compute_time(scenario, cpt) 
-
         years = np.array([d.year for d in date])
         months = np.array([d.month for d in date])
         days = np.array([d.day for d in date])
                 
-        for temp in [phydiat, phydiat_vint, phymisc, phymisc_vint, phyc, phyc_vint]:
-            temp.assign_coords({"time": ("time", time)})
-            temp['time'].attrs['units'] = fe.units
-            temp.attrs['original_file'] = os.path.abspath(f)
-            temp.attrs['script'] = 'extract_phyto.py'
-
         foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_phydiat_1deg_global_monthly_{years.min()}_{years.max()}.nc')
         foutname
         dsout = xr.Dataset()
@@ -122,6 +122,3 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         dsout.to_netcdf(foutname, unlimited_dims=['time'])   
 
         cpt += 1
-
-# %%
-# ?

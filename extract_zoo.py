@@ -57,6 +57,12 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
             print("@@@@@@@@@@@@@@@@@@@@@@@@@@@ error with ", f)
             continue
         data = data.rename({"time_counter": "time", "olevel": 'z'})
+        date, time = fe.compute_time(scenario, cpt) 
+
+        data.assign_coords({"time": ("time", time)})
+        data['time'].attrs['units'] = fe.units
+        data.attrs['original_file'] = os.path.abspath(f)
+        data.attrs['script'] = 'extract_zoos.py'
 
         #-------- processing diatoms
         zmicro = mmol_to_mol * data['ZOO']
@@ -85,12 +91,6 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         zooc_vint.name = 'zooc-vint'
         zooc_vint.attrs['units'] = 'mol/m2'
         
-        for temp in [zmicro, zmicro_vint, zmeso, zmeso_vint, zooc, zooc_vint]:
-            temp.assign_coords({"time": ("time", time)})
-            temp['time'].attrs['units'] = fe.units
-            temp.attrs['original_file'] = os.path.abspath(f)
-            temp.attrs['script'] = 'extract_zoos.py'
-
         foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_zmicro_1deg_global_monthly_{years.min()}_{years.max()}.nc')
         foutname
         dsout = xr.Dataset()
