@@ -79,7 +79,7 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         months = np.array([d.month for d in date])
         days = np.array([d.day for d in date])
             
-        temp.assign_coords({"time": ("time", time)}, inplace=True)
+        temp = temp.assign_coords({"time": ("time", time)}, inplace=True)
         temp['time'].attrs['units'] = fe.units
         temp.attrs['original_file'] = os.path.abspath(f)
         temp.attrs['script'] = 'vo.py'

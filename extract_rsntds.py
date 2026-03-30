@@ -65,7 +65,8 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         except:
             print("@@@@@@@@@@@@@@@@@@@@@@@@@@@ error with ", f)
             continue
-        data = data.rename({"time_counter": "time"})
+        temp = temp.drop_vars(['time_centered'])
+        temp = temp.rename({"time_counter": "time"})
 
         temp.name = 'rsntds'
         temp.attrs['units'] = 'W/m2'
@@ -75,8 +76,8 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         years = np.array([d.year for d in date])
         months = np.array([d.month for d in date])
         days = np.array([d.day for d in date])
-            
-        temp.assign_coords({"time": ("time", time)}, inplace=True)
+
+        temp = temp.assign_coords({"time": ("time", time)})
         temp['time'].attrs['units'] = fe.units
         temp.attrs['original_file'] = os.path.abspath(f)
         temp.attrs['script'] = 'extract_rsntds.py'
@@ -85,5 +86,10 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         temp.to_netcdf(foutname, unlimited_dims=['time'])
 
         cpt += 1
+
+# %%
+temp['time']
+
+# %%
 
 # %%
