@@ -106,6 +106,5 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         dsout.to_netcdf(foutname, unlimited_dims=['time'])
 
         cpt += 1
-        break
 
 # %%
