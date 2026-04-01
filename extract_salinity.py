@@ -63,10 +63,6 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         data = data.rename({"time_counter": "time"})
 
         date, time = fe.compute_time(scenario, cpt) 
-        salt.assign_coords({"time": ("time", time)}, inplace=True)
-        salt['time'].attrs['units'] = fe.units
-        salt.attrs['original_file'] = os.path.abspath(f)
-        salt.attrs['script'] = 'extract_salinity.py'
 
         years = np.array([d.year for d in date])
         months = np.array([d.month for d in date])
@@ -74,6 +70,10 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
 
         salt = (data['so'])
         salt.name = 'so'
+        salt = salt.assign_coords({"time": ("time", time)})
+        salt['time'].attrs['units'] = fe.units
+        salt.attrs['original_file'] = os.path.abspath(f)
+        salt.attrs['script'] = 'extract_salinity.py'
 
         # creation of salt_surf variable by taking the 
         # first ocean level
