@@ -21,8 +21,12 @@ import numpy as np
 import filelist_extraction as fe
 
 # %%
-mesh = xr.open_dataset("/home1/datawork/nbarrier/apecosm/apecosm-private/test/resources/mesh_mask_orca1.nc4")
+mesh = xr.open_dataset("/home1/datawork/nbarrier/apecosm/apecosm-private/test/resources/mesh_mask_orca1.nc4").squeeze()
 mesh
+
+# %%
+weight = mesh['e3t_0'] * mesh['tmask']
+weight = weight.fillna(0)
 
 # %%
 mmol_to_mol = 1e-3
