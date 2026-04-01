@@ -18,7 +18,7 @@ import xarray as xr
 from glob import glob
 import os
 import numpy as np
-import file_extraction as fe
+import filelist_extraction as fe
 
 # %%
 mesh = xr.open_dataset("/home1/datawork/nbarrier/apecosm/apecosm-private/test/resources/mesh_mask_orca1.nc4")
@@ -62,7 +62,7 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         data.assign_coords({"time": ("time", time)})
         data['time'].attrs['units'] = fe.units
         data.attrs['original_file'] = os.path.abspath(f)
-        data.attrs['script'] = 'extract_zoos.py'
+        data.attrs['script'] = 'extract_zoo.py'
 
         #-------- processing diatoms
         zmicro = mmol_to_mol * data['ZOO']

@@ -18,7 +18,7 @@ import xarray as xr
 from glob import glob
 import os
 import numpy as np
-import file_extraction as fe
+import filelist_extraction as fe
 
 # %%
 mesh = xr.open_dataset("/home1/datawork/nbarrier/apecosm/apecosm-private/test/resources/mesh_mask_orca1.nc4")
