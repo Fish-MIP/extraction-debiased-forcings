@@ -79,10 +79,10 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         months = np.array([d.month for d in date])
         days = np.array([d.day for d in date])
             
-        temp = temp.assign_coords({"time": ("time", time)}, inplace=True)
+        temp = temp.assign_coords({"time": ("time", time)})
         temp['time'].attrs['units'] = fe.units
         temp.attrs['original_file'] = os.path.abspath(f)
-        temp.attrs['script'] = 'vo.py'
+        temp.attrs['script'] = 'extract_vo.py'
 
         foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{temp.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
         temp.to_netcdf(foutname, unlimited_dims=['time'])
