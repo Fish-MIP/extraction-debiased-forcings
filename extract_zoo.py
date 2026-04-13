@@ -62,6 +62,10 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
             continue
         data = data.rename({"time_counter": "time", "olevel": 'z'})
         date, time = fe.compute_time(scenario, cpt) 
+     
+        years = np.array([d.year for d in date])
+        months = np.array([d.month for d in date])
+        days = np.array([d.day for d in date])
 
         data.assign_coords({"time": ("time", time)})
         data['time'].attrs['units'] = fe.units
