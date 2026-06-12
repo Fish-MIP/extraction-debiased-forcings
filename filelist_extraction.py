@@ -51,20 +51,6 @@ def extract_cc_scenario(scenario, suffix):
 
 def extract_historical(suffix):
 
-    dirin = os.path.join('/home/datawork-marbec-pmod/Matt/ORCA1_PISCES_BLK', 'PI-bJRA-v2-c5/', 'Output')
-    dirin
-    
-    filelist1 = glob(os.path.join(dirin, f'*1m*{suffix}*nc'))
-    filelist1.sort()
-    filelist1 = filelist1[-43:]
-    len(filelist1)
-    
-    dirin = os.path.join('/home/datawork-marbec-pmod/Matt/ORCA1_PISCES_BLK', 'PD-JRA-v2-c6', 'Output')
-
-    filelist2 = glob(os.path.join(dirin, f'*1m*{suffix}*nc'))
-    filelist2.sort()
-    filelist2
-    
     dirin = os.path.join('/home/datawork-marbec-scenlab/NEMO/FORCING-FISHMIP/', 'SSP245-fIPSL-cOBSN-v2', 'Output')
     dirin
     
@@ -76,28 +62,11 @@ def extract_historical(suffix):
     filelist3 = filelist3[:len(years)]
     filelist3
     
-    filelist = filelist1 + filelist2 + filelist3
-    filelist
-
-    return filelist
+    return filelist3
 
 
 def extract_pi(suffix):
 
-    dirin = os.path.join('/home/datawork-marbec-pmod/Matt/ORCA1_PISCES_BLK', 'PI-bJRA-v2-c5/', 'Output')
-    dirin
-    
-    filelist1 = glob(os.path.join(dirin, f'*1m*{suffix}*nc'))
-    filelist1.sort()
-    filelist1 = filelist1[-43:]
-    len(filelist1)
-    
-    dirin = os.path.join('/home/datawork-marbec-pmod/Matt/ORCA1_PISCES_BLK', 'PD-JRA-v2-c6', 'Output')
-
-    filelist2 = glob(os.path.join(dirin, f'*1m*{suffix}*nc'))
-    filelist2.sort()
-    filelist2
-    
     dirin = os.path.join('/home/datawork-marbec-pmod/Matt/ORCA1_PISCES_FLX/PI-JRA-v2/Output')
     dirin
     
@@ -108,7 +77,7 @@ def extract_pi(suffix):
     years
     filelist3
     
-    filelist = filelist1 + filelist2 + filelist3
+    filelist = filelist3
     filelist
 
     return filelist
