@@ -41,7 +41,7 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
     print("-------------------------- Processing scenario ", scenario)
 
     # Output folder
-    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/', scenario, 'temperature')
+    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/', scenario, 'thetao')
     dirout
     
     # Create output folder if not exists
@@ -55,8 +55,18 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
 
     for f in filelist:
 
-        print("+++++ Processing file ", f)
+        date, time = fe.compute_time(scenario, cpt) 
+        years = np.array([d.year for d in date])
+        months = np.array([d.month for d in date])
+        days = np.array([d.day for d in date])
+        
+        foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_thetao_1deg_global_monthly_{years.min()}_{years.max()}.nc')
 
+        if(os.path.isfile(foutname)): 
+            cpt += 1
+            continue
+        
+        print("+++++ Processing file ", f)
         try:
             data = xr.open_dataset(f)
         except:
@@ -68,12 +78,6 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         temp = (data['thetao'])
         temp.name = 'thetao'
         temp.attrs['units'] = 'C'
-
-        date, time = fe.compute_time(scenario, cpt) 
-
-        years = np.array([d.year for d in date])
-        months = np.array([d.month for d in date])
-        days = np.array([d.day for d in date])
             
         temp = temp.assign_coords({"time": ("time", time)})
         temp['time'].attrs['units'] = fe.units
@@ -91,10 +95,10 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         temp_bot = temp.isel(olevel=mbathy)
         temp_bot.name = 'tob'
         temp_bot.attrs['units'] = temp.attrs['units']
-        
+
         foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{temp.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
         temp.to_netcdf(foutname, unlimited_dims=['time'])
-
+        
         foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{temp_surf.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
         temp_surf.to_netcdf(foutname, unlimited_dims=['time'])
 

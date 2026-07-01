@@ -48,6 +48,7 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
     dirin
             
     filelist = fe.extract_scenario(scenario, 'ptrc_T')
+    print(len(filelist))
     cpt = 0
     
     for f in filelist:
@@ -73,10 +74,14 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         phydiat = mmol_to_mol * data['PHY2']
         phydiat.name = 'phydiat'
         phydiat.attrs['units'] = 'mol/m3'
+        phydiat.attrs['original_file'] = os.path.abspath(f)
+        phydiat.attrs['script'] = 'extract_phyto.py'
 
         phydiat_vint = phydiat.weighted(weight).sum(dim='z')
         phydiat_vint.name = 'phydiat-vint'
         phydiat_vint.attrs['units'] = 'mol/m2'
+        phydiat.attrs['original_file'] = os.path.abspath(f)
+        phydiat.attrs['script'] = 'extract_phyto.py'
 
         #--------- processing misc
         phymisc = mmol_to_mol * data['PHY']
@@ -87,6 +92,11 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         phymisc_vint.name = 'phymisc-vint'
         phymisc_vint.attrs['units'] = 'mol/m2'
 
+        phymisc.attrs['original_file'] = os.path.abspath(f)
+        phymisc.attrs['script'] = 'extract_phyto.py'
+        phymisc_vint.attrs['original_file'] = os.path.abspath(f)
+        phymisc_vint.attrs['script'] = 'extract_phyto.py'
+
         #------- Sum of diat + misc
         phyc = phydiat + phymisc
         phyc.name = 'phyc'
@@ -95,6 +105,11 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         phyc_vint = phyc.weighted(weight).sum(dim='z')
         phyc_vint.name = 'phyc-vint'
         phyc_vint.attrs['units'] = 'mol/m2'
+
+        phyc.attrs['original_file'] = os.path.abspath(f)
+        phyc.attrs['script'] = 'extract_phyto.py'
+        phyc_vint.attrs['original_file'] = os.path.abspath(f)
+        phyc_vint.attrs['script'] = 'extract_phyto.py'
         
         years = np.array([d.year for d in date])
         months = np.array([d.month for d in date])

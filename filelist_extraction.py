@@ -20,8 +20,8 @@ import cftime
 from datetime import datetime
 
 yearref = {}
-yearref['pi'] = 1850
-yearref['historical'] = 1850
+yearref['pi'] = 1958
+yearref['historical'] = 1958
 for scen in ['ssp126', 'ssp370', 'ssp585', 'ssp245']:
     yearref[scen] = 2015
 

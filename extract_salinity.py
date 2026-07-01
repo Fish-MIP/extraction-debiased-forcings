@@ -36,7 +36,6 @@ mbathy
 
 # %%
 for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
-
     print("-------------------------- Processing scenario ", scenario)
 
     # Output folder
@@ -95,7 +94,7 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_so_1deg_global_monthly_{years.min()}_{years.max()}.nc')
         foutname
         print(foutname)
-        salt.to_netcdf(foutname, unlimited_dims=['time'])
+        dsout.to_netcdf(foutname, unlimited_dims=['time'])
 
         cpt += 1
 

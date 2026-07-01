@@ -39,7 +39,7 @@ filelist[:5]
 
 # %%
 scratch_folder = os.path.join(dirin, 'scratch')
-if os.path.isfile(scratch_folder):
+if not os.path.dir(scratch_folder):
     os.mkdir(scratch_folder)
 
 # %% [markdown]
@@ -109,13 +109,16 @@ matching_years
 for p in range(len(reconstructed_period)):
     year_source = matching_years[p]
     year_dest = reconstructed_period[p]
-    file_source = dict_files[year_source]
-    file_dest = file_source.replace(str(year_source), str(year_dest))
-    print(file_dest, file_source)
-    if(not os.path.isfile(file_dest)):
-        os.symlink(file_source, file_dest)
-    hist_file_dest = file_dest.replace('_pi_', '_historical_')
-    if(not os.path.isfile(hist_file_dest)):
-        os.symlink(file_source, hist_file_dest)
+    if year_source not in dict_files:
+        print("Error with PI file for year ", year_source)
+    else:
+        file_source = dict_files[year_source]
+        file_dest = file_source.replace(str(year_source), str(year_dest))
+        print(file_dest, file_source)
+        if(not os.path.isfile(file_dest)):
+            os.symlink(file_source, file_dest)
+        hist_file_dest = file_dest.replace('_pi_', '_historical_')
+        if(not os.path.isfile(hist_file_dest)):
+            os.symlink(file_source, hist_file_dest)
 
 # %%

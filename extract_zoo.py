@@ -76,28 +76,40 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         zmicro = mmol_to_mol * data['ZOO']
         zmicro.name = 'zmicro'
         zmicro.attrs['units'] = 'mol/m3'
+        zmicro.attrs['original_file'] = os.path.abspath(f)
+        zmicro.attrs['script'] = 'extract_zoo.py'
 
         zmicro_vint = zmicro.weighted(weight).sum(dim='z')
         zmicro_vint.name = 'zmicro-vint'
         zmicro_vint.attrs['units'] = 'mol/m2'
+        zmicro_vint.attrs['original_file'] = os.path.abspath(f)
+        zmicro_vint.attrs['script'] = 'extract_zoo.py'
 
         #--------- processing misc
         zmeso = mmol_to_mol * data['ZOO2']
         zmeso.name = 'zmeso'
         zmeso.attrs['units'] = 'mol/m3'
+        zmeso.attrs['original_file'] = os.path.abspath(f)
+        zmeso.attrs['script'] = 'extract_zoo.py'
 
         zmeso_vint = zmeso.weighted(weight).sum(dim='z')
         zmeso_vint.name = 'zmeso-vint'
         zmeso_vint.attrs['units'] = 'mol/m2'
+        zmeso_vint.attrs['original_file'] = os.path.abspath(f)
+        zmeso_vint.attrs['script'] = 'extract_zoo.py'
 
         #------- Sum of diat + misc
         zooc = zmicro + zmeso
         zooc.name = 'zooc'
         zooc.attrs['units'] = 'mol/m3'
+        zooc.attrs['original_file'] = os.path.abspath(f)
+        zooc.attrs['script'] = 'extract_zoo.py'
 
         zooc_vint = zooc.weighted(weight).sum(dim='z')
         zooc_vint.name = 'zooc-vint'
         zooc_vint.attrs['units'] = 'mol/m2'
+        zooc_vint.attrs['original_file'] = os.path.abspath(f)
+        zooc_vint.attrs['script'] = 'extract_zoo.py'
         
         foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_zmicro_1deg_global_monthly_{years.min()}_{years.max()}.nc')
         foutname

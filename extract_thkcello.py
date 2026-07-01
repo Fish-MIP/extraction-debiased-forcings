@@ -36,12 +36,12 @@ mbathy = mbathy.astype(int)
 mbathy
 
 # %%
-for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
+for scenario in ['historical', 'pi']:
 
     print("-------------------------- Processing scenario ", scenario)
 
     # Output folder
-    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/', scenario, 'thkcello')
+    dirout = os.path.join('/home1/scratch/nbarrier/fishmip-osp/to_send/thkcello/')
     dirout
     
     # Create output folder if not exists
@@ -54,8 +54,18 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
 
     for f in filelist:
 
-        print("+++++ Processing file ", f)
+        date, time = fe.compute_time(scenario, cpt) 
 
+        years = np.array([d.year for d in date])
+        months = np.array([d.month for d in date])
+        days = np.array([d.day for d in date])
+
+        foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_thkcello_1deg_global_monthly_{years.min()}_{years.max()}.nc')
+        if os.path.isfile(foutname):
+            cpt += 1
+            continue
+        
+        print("+++++ Processing file ", f)
         try:
             data = xr.open_dataset(f)
         except:
@@ -68,11 +78,7 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         temp.name = 'thkcello'
         temp.attrs['units'] = 'm'
 
-        date, time = fe.compute_time(scenario, cpt) 
 
-        years = np.array([d.year for d in date])
-        months = np.array([d.month for d in date])
-        days = np.array([d.day for d in date])
             
         temp = temp.assign_coords({"time": ("time", time)})
         temp['time'].attrs['units'] = fe.units
@@ -82,7 +88,7 @@ for scenario in ['SSP245',  'SSP370',  'SSP585', 'SSP126', 'historical', 'pi']:
         date = temp['time']
         date
 
-        foutname = os.path.join(dirout, f'ipsl_{scenario.lower()}_{temp.name}_1deg_global_monthly_{years.min()}_{years.max()}.nc')
+
         temp.to_netcdf(foutname, unlimited_dims=['time'])
 
         cpt += 1
